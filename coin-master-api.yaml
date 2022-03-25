@@ -64,7 +64,7 @@ spec:
           backend:
             service:
               name: coin-master-api-internal-service
-              port: 
+              port:
                 number: 80
   ingressClassName: nginx
 
