@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: api-key
+type: Opaque
+data:
+  exchange_api_key: <SECRET API KEY>
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: coin-master-api
+  labels:
+        run: coin-master-api
+        app: coin-master-api
+spec:
+  containers:
+  - name: coin-master-api
+    image: guyseaneden/coin-master-api
+    ports:
+    - containerPort: 8000
+    env:
+      - name: EXCHANGE_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: api-key
+            key: exchange_api_key
+      - name: EXCHANGE_BASE_URL
+        value: "https://v6.exchangerate-api.com"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: coin-master-api-internal-service
+  labels:
+        run: coin-master-api-internal-service
+spec:
+  type: ClusterIP
+  selector:
+    app: coin-master-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: coin-master-api-ingress
+spec:
+  rules:
+  - host: coin-master-api.com
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: coin-master-api-internal-service
+              port: 
+                number: 80
+  ingressClassName: nginx
+
