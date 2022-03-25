@@ -8,27 +8,38 @@ data:
 
 ---
 
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: coin-master-api
+  name: coin-master-deployment
   labels:
-        run: coin-master-api
-        app: coin-master-api
+    app: coin-master-api
 spec:
-  containers:
-  - name: coin-master-api
-    image: guyseaneden/coin-master-api
-    ports:
-    - containerPort: 8000
-    env:
-      - name: EXCHANGE_API_KEY
-        valueFrom:
-          secretKeyRef:
-            name: api-key
-            key: exchange_api_key
-      - name: EXCHANGE_BASE_URL
-        value: "https://v6.exchangerate-api.com"
+  replicas: 2
+  selector:
+    matchLabels:
+      app: coin-master-api
+  template:
+    metadata:
+      name: coin-master-api
+      labels:
+            run: coin-master-api
+            app: coin-master-api
+    spec:
+      containers:
+      - name: coin-master-api
+        image: guyseaneden/coin-master-api
+        ports:
+        - containerPort: 8000
+        env:
+          - name: EXCHANGE_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: api-key
+                key: exchange_api_key
+          - name: EXCHANGE_BASE_URL
+            value: "https://v6.exchangerate-api.com"
+
 
 ---
 
