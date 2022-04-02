@@ -4,7 +4,7 @@ metadata:
   name: api-key
 type: Opaque
 data:
-  exchange_api_key: <SECRET API KEY>
+  exchange_api_key: NzVlZWVkMWM1MTAxNjc0YmEwYjNlOWMx
 
 ---
 
@@ -61,7 +61,7 @@ spec:
 
 ---
 
-apiVersion: networking.k8s.io/v1
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: coin-master-api-ingress
@@ -71,11 +71,8 @@ spec:
     http:
       paths:
         - path: /
-          pathType: Prefix
           backend:
-            service:
-              name: coin-master-api-internal-service
-              port:
-                number: 80
+            serviceName: coin-master-api-internal-service
+            servicePort: 80
   ingressClassName: nginx
 
