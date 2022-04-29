@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: coin-app # Label for the Deployment
+  name: coin-app # Name of Deployment
+spec:
+  selector:
+    matchLabels:
+      run: coin-app
+  template: # Pod template
+    metadata:
+      labels:
+        run: coin-app # Labels Pods from this Deployment
+    spec: # Pod specification; each Pod created by this Deployment has this specification
+      containers:
+      - image: guyseaneden/coin-master-api # Application to run in Deployment's Pods
+        name: coin-pod # Container name
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+        env:
+          - name: EXCHANGE_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: api-key
+                key: exchange_api_key
+          - name: EXCHANGE_BASE_URL
+            value: "https://v6.exchangerate-api.com"
