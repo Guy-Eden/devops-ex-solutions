@@ -220,6 +220,7 @@ resource "kubernetes_manifest" "coin_logging" {
     "fluentd" = {}
     "fluentbit" = {}
     "controlNamespace"="logging"
+    "watchNamespaces"=["default", "logging"]
     }
   }
 }
@@ -228,18 +229,13 @@ resource "kubernetes_manifest" "coin_logging" {
 resource "kubernetes_manifest" "coin_logging_output" {
   manifest = {
     "apiVersion" = "logging.banzaicloud.io/v1beta1"
-    "kind" = "Output"
+    "kind" = "ClusterOutput"
     "metadata" = {
       "name" = "coin-logging-output"
       "namespace" = "logging"
     }
     "spec" = {
       "elasticsearch" = {
-        "buffer" = {
-          "timekey" = "1m"
-          "timekey_use_utc" = true
-          "timekey_wait" = "30s"
-        }
         "host" = "coin-elastic-es-http.logging.svc.cluster.local"
         "password" = {
           "valueFrom" = {
@@ -263,16 +259,13 @@ resource "kubernetes_manifest" "coin_logging_output" {
 resource "kubernetes_manifest" "coin_logging_flow" {
   manifest = {
     "apiVersion" = "logging.banzaicloud.io/v1beta1"
-    "kind" = "Flow"
+    "kind" = "ClusterFlow"
     "metadata" = {
       "name" = "coin-es-flow"
       "namespace" = "logging"
     }
     "spec" = {
       "filters" = [
-        {
-          "tag_normaliser" = {}
-        },
         {
           "parser" = {
             "parse" = {
@@ -281,8 +274,13 @@ resource "kubernetes_manifest" "coin_logging_flow" {
             "reserve_data" = true
           }
         },
+        {
+          "stdout" = {
+            "output_type" = "json"
+          }
+        }
       ]
-      "localOutputRefs" = [
+      "globalOutputRefs" = [
         "coin-logging-output",
       ]
       "match" = [
@@ -290,7 +288,11 @@ resource "kubernetes_manifest" "coin_logging_flow" {
           "select" = {
             "labels" = {
               "app.kubernetes.io/name" = "coin-app"
-            }
+            },
+            "namespaces" = [
+              "default",
+              "logging"
+            ]
           }
         },
       ]
