@@ -63,7 +63,8 @@ resource "kubernetes_deployment" "coin_app" {
       metadata {
         annotations = {}
         labels = {
-          run = "coin-app"
+          run = "coin-app",
+          name = "coin-app"
         }
       }
       spec {
@@ -287,7 +288,7 @@ resource "kubernetes_manifest" "coin_logging_flow" {
         {
           "select" = {
             "labels" = {
-              "app.kubernetes.io/name" = "coin-app"
+              "run" = "coin-app"
             },
             "namespaces" = [
               "default",
